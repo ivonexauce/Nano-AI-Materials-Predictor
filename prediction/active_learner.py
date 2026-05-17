@@ -98,7 +98,7 @@ class ActiveLearner:
             self._load_model(checkpoint_path)
 
     def _load_model(self, path: str):
-        checkpoint = torch.load(path, map_location="cpu")
+        checkpoint = torch.load(path, map_location="cpu", weights_only=False)
         self.model = build_model()
         self.model.load_state_dict(checkpoint["model_state"])
         self.target_mean = checkpoint.get("target_mean", 0.0)

@@ -143,10 +143,10 @@ def load_sample_data() -> list:
         return materials
     else:
         print("[INFO] Generating synthetic sample data...")
-        return generate_synthetic_samples(100)
+        return generate_synthetic_samples(100, save_to_disk=True)
 
 
-def generate_synthetic_samples(n: int = 100) -> list:
+def generate_synthetic_samples(n: int = 100, save_to_disk: bool = True) -> list:
     """Generate synthetic material data for testing without API access."""
     import random
     import math
@@ -196,10 +196,11 @@ def generate_synthetic_samples(n: int = 100) -> list:
         }
         samples.append(sample)
 
-    output = {"generated_at": datetime.utcnow().isoformat(), "count": n, "materials": samples}
-    with open("data/sample_materials.json", "w") as f:
-        json.dump(output, f, indent=2)
-    print(f"[✓] Generated {n} synthetic material samples")
+    if save_to_disk:
+        output = {"generated_at": datetime.utcnow().isoformat(), "count": n, "materials": samples}
+        with open("data/sample_materials.json", "w") as f:
+            json.dump(output, f, indent=2)
+        print(f"[✓] Generated {n} synthetic material samples")
     return samples
 
 

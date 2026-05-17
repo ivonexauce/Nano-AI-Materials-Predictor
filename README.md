@@ -57,25 +57,54 @@ Key capabilities:
 Nano-AI-Materials-Predictor/
 │
 ├── data/
-│   ├── fetcher.py                   # Materials Project API client + synthetic data generator
-│   └── sample_materials.json        # Generated sample materials (no API key needed)
+│   ├── fetcher.py                   # Materials Project API client
+│   ├── preprocessor.py              # CIF → graph conversion
+│   ├── dataset.py                   # PyTorch Geometric dataset
+│   └── sample_materials.json        # Sample materials (no API key needed)
 │
 ├── models/
-│   └── cgcnn.py                     # Crystal Graph Convolutional Neural Network
+│   ├── cgcnn.py                     # Crystal Graph Convolutional Neural Network
+│   ├── megnet.py                    # Multi-layer Edge Graph Network
+│   ├── schnet.py                    # SchNet (distance-based convolution)
+│   └── model_factory.py             # Model selection and initialization
+│
+├── gnn/
+│   ├── graph_builder.py             # Atom/bond graph construction
+│   ├── message_passing.py           # Custom message passing layer
+│   ├── attention.py                 # Graph attention mechanism
+│   └── pooling.py                   # Global graph pooling strategies
 │
 ├── prediction/
-│   ├── trainer.py                   # Training loop with early stopping, batching, checkpointing
-│   └── active_learner.py            # Uncertainty-based active learning (MC Dropout)
+│   ├── trainer.py                   # Training loop with early stopping
+│   ├── evaluator.py                 # MAE, RMSE, R² metrics
+│   ├── predictor.py                 # Inference on new materials
+│   └── active_learner.py            # Uncertainty-based active learning
 │
 ├── visualization/
+│   ├── structure_viewer.py          # 3D crystal structure renderer
+│   ├── property_plotter.py          # Property distribution plots
+│   ├── parity_plot.py               # Predicted vs actual plots
 │   └── dashboard.py                 # Streamlit interactive dashboard
 │
-├── checkpoints/                     # Saved model weights and training history
+├── utils/
+│   ├── periodic_table.py            # Atomic feature vectors
+│   ├── crystal_utils.py             # Symmetry and lattice utilities
+│   └── metrics.py                   # Custom evaluation metrics
 │
-├── .env.example
-├── .gitignore
-├── LICENSE
+├── notebooks/
+│   ├── 01_data_exploration.ipynb    # EDA on Materials Project data
+│   ├── 02_graph_construction.ipynb  # Visual walkthrough of GNN input
+│   ├── 03_model_training.ipynb      # Step-by-step training notebook
+│   └── 04_active_learning.ipynb     # Active learning experiment
+│
+├── tests/
+│   ├── test_graph_builder.py
+│   ├── test_model.py
+│   └── test_predictor.py
+│
+├── checkpoints/                     # Saved model weights and training history
 ├── requirements.txt
+├── Dockerfile
 └── README.md
 ```
 
