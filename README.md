@@ -177,9 +177,6 @@ Unlabeled Pool → Uncertainty Estimation → Select Top-K → DFT/Experiment �
 This project is directly connected to the intersection of:
 - **MTech Nanoscience & Nanotechnology** — crystal structure understanding, DFT baselines
 - **PhD in Computer Studies** — AI/ML architecture, graph learning
-- **Second PhD in Electronics & ECE/IoT** — material-informed sensor design
-
-*Target publication venue: npj Computational Materials, Journal of Chemical Information and Modeling*
 
 ---
 
