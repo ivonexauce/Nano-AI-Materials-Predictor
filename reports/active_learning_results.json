@@ -1,0 +1,47 @@
+{
+  "strategy": "uncertainty",
+  "labeled_count": 80,
+  "unlabeled_remaining": 220,
+  "query_history": [
+    {
+      "round": 1,
+      "n_selected": 10,
+      "strategy": "uncertainty",
+      "timestamp": "2026-05-17T05:31:17.205746",
+      "top_scores": [
+        0.9964,
+        0.9958,
+        0.9932,
+        0.9929,
+        0.9919
+      ]
+    },
+    {
+      "round": 2,
+      "n_selected": 10,
+      "strategy": "uncertainty",
+      "timestamp": "2026-05-17T05:31:17.205870",
+      "top_scores": [
+        0.9989,
+        0.9981,
+        0.9957,
+        0.9955,
+        0.9862
+      ]
+    },
+    {
+      "round": 3,
+      "n_selected": 10,
+      "strategy": "uncertainty",
+      "timestamp": "2026-05-17T05:31:17.205971",
+      "top_scores": [
+        0.9942,
+        0.9818,
+        0.9751,
+        0.959,
+        0.9544
+      ]
+    }
+  ],
+  "timestamp": "2026-05-17T05:31:17.206123"
+}
