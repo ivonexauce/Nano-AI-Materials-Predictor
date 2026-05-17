@@ -15,14 +15,14 @@ Built by **UMBA YANGA IVON EXAUCE** — Deep-Tech Systems Architect & Innovation
 
 ## 🎯 Overview
 
-This project bridges **computational nanoscience** and **modern deep learning** to predict material properties at the atomic level — without running expensive molecular dynamics simulations for every candidate material.
+This project bridges **computational nanoscience** and **modern deep learning** to predict material properties at the atomic level — without running expensive DFT simulations for every candidate material.
 
 Key capabilities:
 - **Graph Neural Networks (GNNs)** treating crystal structures as graphs of atoms and bonds
 - **Materials Project API** integration for real nanoscale material datasets
-- **Multi-target prediction**: bandgap, formation energy, bulk modulus, electrical conductivity
+- **Single & multi-target prediction**: bandgap, formation energy, bulk modulus
 - **Active learning loop** to prioritize which materials to simulate next
-- **Interactive visualization** of crystal structures and property landscapes
+- **Interactive visualization** of property distributions and data
 
 ---
 
@@ -31,27 +31,21 @@ Key capabilities:
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │              DATA LAYER — Materials Project API               │
-│   Crystal Structures (CIF) │ DFT Properties │ Composition    │
+│   Crystal Structures │ DFT Properties │ Composition           │
 └──────────────────────────────┬───────────────────────────────┘
                                │
 ┌──────────────────────────────▼───────────────────────────────┐
-│              GRAPH CONSTRUCTION LAYER                         │
-│   Atoms = Nodes │ Bonds = Edges │ Features = Atomic Props    │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-┌──────────────────────────────▼───────────────────────────────┐
-│              GNN MODEL LAYER                                  │
-│   Message Passing │ Graph Attention │ Global Pooling         │
-│   MEGNet │ SchNet │ DimeNet++ │ Custom CGCNN                 │
+│              CGCNN MODEL                                      │
+│   Crystal Graph Convolution │ Global Mean Pooling             │
 └──────────────────────────────┬───────────────────────────────┘
                                │
           ┌────────────────────┼─────────────────────┐
           ▼                    ▼                      ▼
   ┌──────────────┐   ┌──────────────────┐   ┌────────────────┐
   │  PREDICTION  │   │  ACTIVE LEARNING │   │  VISUALIZATION │
-  │  Bandgap     │   │  Uncertainty     │   │  3D Structure  │
-  │  Formation E │   │  Sampling        │   │  Property Maps │
-  │  Bulk Modulus│   │  Next Best Exp.  │   │  Dashboards    │
+  │  Bandgap     │   │  Uncertainty     │   │  Property      │
+  │  Formation E │   │  MC Dropout      │   │  Distributions │
+  │  Bulk Modulus│   │  Query by Batch  │   │  Parity Plot   │
   └──────────────┘   └──────────────────┘   └────────────────┘
 ```
 
@@ -63,53 +57,25 @@ Key capabilities:
 Nano-AI-Materials-Predictor/
 │
 ├── data/
-│   ├── fetcher.py                   # Materials Project API client
-│   ├── preprocessor.py              # CIF → graph conversion
-│   ├── dataset.py                   # PyTorch Geometric dataset
-│   └── sample_materials.json        # 50 sample materials (no API key needed)
+│   ├── fetcher.py                   # Materials Project API client + synthetic data generator
+│   └── sample_materials.json        # Generated sample materials (no API key needed)
 │
 ├── models/
-│   ├── cgcnn.py                     # Crystal Graph Convolutional Neural Network
-│   ├── megnet.py                    # Multi-layer Edge Graph Network
-│   ├── schnet.py                    # SchNet (distance-based convolution)
-│   └── model_factory.py             # Model selection and initialization
-│
-├── gnn/
-│   ├── graph_builder.py             # Atom/bond graph construction
-│   ├── message_passing.py           # Custom message passing layer
-│   ├── attention.py                 # Graph attention mechanism
-│   └── pooling.py                   # Global graph pooling strategies
+│   └── cgcnn.py                     # Crystal Graph Convolutional Neural Network
 │
 ├── prediction/
-│   ├── trainer.py                   # Training loop with early stopping
-│   ├── evaluator.py                 # MAE, RMSE, R² metrics
-│   ├── predictor.py                 # Inference on new materials
-│   └── active_learner.py            # Uncertainty-based active learning
+│   ├── trainer.py                   # Training loop with early stopping, batching, checkpointing
+│   └── active_learner.py            # Uncertainty-based active learning (MC Dropout)
 │
 ├── visualization/
-│   ├── structure_viewer.py          # 3D crystal structure renderer
-│   ├── property_plotter.py          # Property distribution plots
-│   ├── parity_plot.py               # Predicted vs actual plots
 │   └── dashboard.py                 # Streamlit interactive dashboard
 │
-├── utils/
-│   ├── periodic_table.py            # Atomic feature vectors
-│   ├── crystal_utils.py             # Symmetry and lattice utilities
-│   └── metrics.py                   # Custom evaluation metrics
+├── checkpoints/                     # Saved model weights and training history
 │
-├── notebooks/
-│   ├── 01_data_exploration.ipynb    # EDA on Materials Project data
-│   ├── 02_graph_construction.ipynb  # Visual walkthrough of GNN input
-│   ├── 03_model_training.ipynb      # Step-by-step training notebook
-│   └── 04_active_learning.ipynb     # Active learning experiment
-│
-├── tests/
-│   ├── test_graph_builder.py
-│   ├── test_model.py
-│   └── test_predictor.py
-│
+├── .env.example
+├── .gitignore
+├── LICENSE
 ├── requirements.txt
-├── Dockerfile
 └── README.md
 ```
 
@@ -125,10 +91,10 @@ cd Nano-AI-Materials-Predictor
 pip install -r requirements.txt
 
 # Train on sample materials (no API key needed)
-python prediction/trainer.py --data data/sample_materials.json --target bandgap
+python prediction/trainer.py --data data/sample_materials.json --target bandgap_ev
 
-# Predict for a new composition
-python prediction/predictor.py --formula "TiO2"
+# Run active learning demo
+python prediction/active_learner.py
 
 # Launch dashboard
 streamlit run visualization/dashboard.py
@@ -141,41 +107,29 @@ cp .env.example .env
 # Add your Materials Project API key to .env:
 # MP_API_KEY=your_key_here
 
-# Fetch 10,000 materials
-python data/fetcher.py --n-materials 10000 --properties bandgap,formation_energy
-
-# Build graph dataset
-python data/preprocessor.py
+# Fetch materials
+python data/fetcher.py --n-materials 1000
 
 # Train GNN
-python prediction/trainer.py --model cgcnn --target bandgap --epochs 200
+python prediction/trainer.py --target bandgap_ev --epochs 200
 ```
 
 ---
 
-## 🧠 Models
+## 🧠 Model
 
 ### CGCNN (Crystal Graph Convolutional Neural Network)
-The baseline model. Treats crystals as periodic graphs with atoms as nodes and bonds as edges. Fast to train, strong baseline for most property prediction tasks.
-
-### MEGNet (Multi-layer Edge Graph Network)
-Extends CGCNN by also updating edge features during message passing — capturing bond length and angle changes under different conditions (temperature, pressure).
-
-### SchNet
-Distance-aware continuous-filter convolution. Particularly effective for predicting quantum-mechanical properties like HOMO-LUMO gaps and electron density.
+Treats crystals as periodic graphs with atoms as nodes and bonds as edges. Uses gated residual message passing with global mean pooling. Implements the architecture from Xie & Grossman (PRL 2018).
 
 ---
 
 ## 🎯 Target Properties
 
-| Property | Unit | MAE (CGCNN) | Use Case |
-|---|---|---|---|
-| Bandgap | eV | ~0.25 eV | Semiconductor design |
-| Formation Energy | eV/atom | ~0.08 eV | Stability screening |
-| Bulk Modulus | GPa | ~15 GPa | Mechanical hardness |
-| Shear Modulus | GPa | ~12 GPa | Material toughness |
-
-*MAE values based on the original CGCNN paper benchmarks.*
+| Property | Unit | Use Case |
+|---|---|---|
+| Bandgap | eV | Semiconductor design |
+| Formation Energy | eV/atom | Stability screening |
+| Bulk Modulus | GPa | Mechanical hardness |
 
 ---
 
@@ -203,15 +157,11 @@ This project is directly connected to the intersection of:
 ## 📊 Visualization
 
 ```bash
-# 3D crystal structure viewer
-python visualization/structure_viewer.py --material "mp-149"  # Silicon
-
-# Property heatmap across composition space
-python visualization/property_plotter.py --property bandgap
-
-# Parity plot (predicted vs DFT)
-python visualization/parity_plot.py --model cgcnn --target formation_energy
+# Launch interactive dashboard
+streamlit run visualization/dashboard.py
 ```
+
+The Streamlit dashboard includes: bandgap distribution histogram, element frequency chart, formation energy vs bandgap scatter plot, mock parity plot, and an interactive data table with filters.
 
 ---
 
